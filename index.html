@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tiply - Tip Calculator</title>
+  <style>
+    :root {
+      --ink: #17201e;
+      --muted: #6d7874;
+      --paper: #f5f8f2;
+      --card: #ffffff;
+      --line: #dce5de;
+      --accent: #ed6b4f;
+      --accent-dark: #b8422f;
+      --mint: #dcefe5;
+      --shadow: 0 24px 60px rgba(30, 55, 43, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      content: "";
+      opacity: .55;
+      background:
+        radial-gradient(circle at 12% 12%, #d7eee1 0 10%, transparent 31%),
+        radial-gradient(circle at 92% 86%, #ffe5d2 0 8%, transparent 27%);
+    }
+
+    .page {
+      display: grid;
+      grid-template-columns: minmax(260px, .8fr) minmax(360px, 1.2fr);
+      gap: clamp(2rem, 7vw, 7rem);
+      width: min(1080px, calc(100% - 3rem));
+      min-height: 100vh;
+      margin: auto;
+      padding: clamp(3rem, 10vh, 7rem) 0;
+      align-items: center;
+    }
+
+    .intro { align-self: center; }
+
+    .eyebrow {
+      color: var(--accent-dark);
+      font: 700 .78rem/1 "Trebuchet MS", sans-serif;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 430px;
+      margin: 1.1rem 0 1.2rem;
+      font-size: clamp(3.4rem, 7vw, 6.6rem);
+      line-height: .86;
+      letter-spacing: -.07em;
+      font-weight: 500;
+    }
+
+    .intro p {
+      max-width: 330px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.6;
+    }
+
+    .calculator {
+      padding: clamp(1.35rem, 4vw, 2.5rem);
+      background: var(--card);
+      border: 1px solid rgba(220, 229, 222, .9);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      animation: rise .6s ease both;
+    }
+
+    .form-section + .form-section { margin-top: 1.75rem; }
+
+    label, .section-label {
+      display: block;
+      margin-bottom: .65rem;
+      color: var(--muted);
+      font: 700 .75rem/1.2 "Trebuchet MS", sans-serif;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .input-wrap { position: relative; }
+
+    .currency {
+      position: absolute;
+      top: 50%;
+      left: 1rem;
+      color: var(--accent-dark);
+      font-size: 1.35rem;
+      transform: translateY(-52%);
+    }
+
+    input {
+      width: 100%;
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      color: var(--ink);
+      background: #fbfdfb;
+      font: 700 1.25rem/1 "Trebuchet MS", sans-serif;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(237, 107, 79, .13); }
+    input[type="number"] { padding: 1rem 1rem 1rem 2.5rem; }
+    input[type="number"]::-webkit-inner-spin-button { opacity: .45; }
+
+    .tip-options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .55rem;
+    }
+
+    .tip-option {
+      padding: .8rem .3rem;
+      border: 1.5px solid var(--line);
+      border-radius: 9px;
+      color: var(--ink);
+      background: #fbfdfb;
+      cursor: pointer;
+      font: 700 .95rem "Trebuchet MS", sans-serif;
+      transition: background .2s, border-color .2s, color .2s, transform .2s;
+    }
+
+    .tip-option:hover { transform: translateY(-1px); border-color: var(--accent); }
+    .tip-option.active { border-color: var(--accent); color: white; background: var(--accent); }
+
+    .custom-tip { margin-top: .65rem; }
+    .custom-tip input { padding: .8rem 1rem; font-size: 1rem; }
+
+    .people-row {
+      display: grid;
+      grid-template-columns: 1fr 116px;
+      gap: 1rem;
+      align-items: end;
+    }
+
+    .people-control { display: flex; align-items: stretch; }
+    .people-control button {
+      width: 38px;
+      border: 1.5px solid var(--line);
+      color: var(--accent-dark);
+      background: #f2f7f3;
+      cursor: pointer;
+      font: 700 1.25rem "Trebuchet MS", sans-serif;
+    }
+    .people-control button:first-child { border-radius: 9px 0 0 9px; }
+    .people-control button:last-child { border-radius: 0 9px 9px 0; }
+    .people-control input { min-width: 0; padding: .9rem .3rem; border-radius: 0; text-align: center; }
+
+    .results {
+      display: grid;
+      gap: .9rem;
+      margin-top: 2rem;
+      padding: 1.35rem;
+      border-radius: 14px;
+      color: white;
+      background: var(--ink);
+    }
+
+    .result-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+    .result-row span { color: #afc2b7; font: .82rem "Trebuchet MS", sans-serif; }
+    .result-row strong { font: 700 1.2rem "Trebuchet MS", sans-serif; }
+    .result-row.total { margin-top: .25rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.16); }
+    .result-row.total strong { color: #ffc8b9; font-size: 2.15rem; }
+
+    .reset {
+      display: block;
+      width: 100%;
+      margin-top: 1rem;
+      padding: .85rem;
+      border: 0;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      font: 700 .75rem "Trebuchet MS", sans-serif;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .reset:hover { color: var(--accent-dark); }
+
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 700px) {
+      .page { grid-template-columns: 1fr; width: min(100% - 2rem, 500px); padding: 3rem 0; align-content: center; }
+      .intro { text-align: center; }
+      h1 { margin: .9rem auto 1rem; font-size: clamp(3.6rem, 17vw, 5rem); }
+      .intro p { margin: auto; }
+      .calculator { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="intro" aria-labelledby="page-title">
+      <div class="eyebrow">The easy split</div>
+      <h1 id="page-title">Tip the<br>right way.</h1>
+      <p>A little math for a lot less mental load. Add your bill, choose a tip, and let the table settle itself.</p>
+    </section>
+
+    <section class="calculator" aria-label="Tip calculator">
+      <div class="form-section">
+        <label for="bill">Bill amount</label>
+        <div class="input-wrap">
+          <span class="currency" aria-hidden="true">$</span>
+          <input id="bill" type="number" min="0" step="0.01" value="80" inputmode="decimal">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <span class="section-label">Tip percentage</span>
+        <div class="tip-options" role="group" aria-label="Tip percentage">
+          <button class="tip-option" type="button" data-tip="10">10%</button>
+          <button class="tip-option active" type="button" data-tip="15">15%</button>
+          <button class="tip-option" type="button" data-tip="20">20%</button>
+          <button class="tip-option" type="button" data-tip="25">25%</button>
+        </div>
+        <div class="custom-tip">
+          <label for="custom-tip">Or enter a custom tip</label>
+          <input id="custom-tip" type="number" min="0" step="1" placeholder="Custom %" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="form-section people-row">
+        <div>
+          <label for="people">Number of people</label>
+          <div class="people-control">
+            <button type="button" data-change="-1" aria-label="Remove one person">-</button>
+            <input id="people" type="number" min="1" step="1" value="2" inputmode="numeric">
+            <button type="button" data-change="1" aria-label="Add one person">+</button>
+          </div>
+        </div>
+        <div></div>
+      </div>
+
+      <div class="results" aria-live="polite">
+        <div class="result-row"><span>Tip amount</span><strong id="tip-amount">$12.00</strong></div>
+        <div class="result-row"><span>Total bill</span><strong id="total-bill">$92.00</strong></div>
+        <div class="result-row total"><span>Each person pays</span><strong id="per-person">$46.00</strong></div>
+      </div>
+      <button class="reset" id="reset" type="button">Reset calculator</button>
+    </section>
+  </main>
+
+  <script>
+    const billInput = document.querySelector('#bill');
+    const customTipInput = document.querySelector('#custom-tip');
+    const peopleInput = document.querySelector('#people');
+    const tipButtons = document.querySelectorAll('[data-tip]');
+    const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
+    let selectedTip = 15;
+
+    function calculate() {
+      const bill = Math.max(0, Number.parseFloat(billInput.value) || 0);
+      const customTip = Number.parseFloat(customTipInput.value);
+      const tipRate = Number.isFinite(customTip) && customTip >= 0 ? customTip : selectedTip;
+      const people = Math.max(1, Math.floor(Number.parseFloat(peopleInput.value) || 1));
+      const tip = bill * tipRate / 100;
+      const total = bill + tip;
+
+      peopleInput.value = people;
+      document.querySelector('#tip-amount').textContent = money.format(tip);
+      document.querySelector('#total-bill').textContent = money.format(total);
+      document.querySelector('#per-person').textContent = money.format(total / people);
+    }
+
+    tipButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        selectedTip = Number(button.dataset.tip);
+        customTipInput.value = '';
+        tipButtons.forEach((item) => item.classList.toggle('active', item === button));
+        calculate();
+      });
+    });
+
+    document.querySelectorAll('input').forEach((input) => input.addEventListener('input', () => {
+      if (input === customTipInput) tipButtons.forEach((button) => button.classList.remove('active'));
+      calculate();
+    }));
+
+    document.querySelectorAll('[data-change]').forEach((button) => {
+      button.addEventListener('click', () => {
+        peopleInput.value = Math.max(1, (Number.parseInt(peopleInput.value, 10) || 1) + Number(button.dataset.change));
+        calculate();
+      });
+    });
+
+    document.querySelector('#reset').addEventListener('click', () => {
+      billInput.value = 80;
+      peopleInput.value = 2;
+      customTipInput.value = '';
+      selectedTip = 15;
+      tipButtons.forEach((button) => button.classList.toggle('active', button.dataset.tip === '15'));
+      calculate();
+    });
+
+    calculate();
+  </script>
+</body>
+</html>
